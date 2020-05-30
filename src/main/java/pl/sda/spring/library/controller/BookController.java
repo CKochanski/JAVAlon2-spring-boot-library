@@ -40,10 +40,7 @@ public class BookController {
 
     @DeleteMapping(value = "/book/remove/{id}")
     public ResponseEntity<Void> deleteBookById(@PathVariable Long id) {
-        boolean deleted = orderService.removeBook(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        orderService.removeBook(id);
+        return ResponseEntity.noContent().build();
     }
 }

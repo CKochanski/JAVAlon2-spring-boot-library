@@ -5,6 +5,7 @@ import pl.sda.spring.library.model.Book;
 import pl.sda.spring.library.repository.BookRepository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,24 +22,27 @@ public class OrderService {
         if (title != null) {
             return bookRepository.findAllByTitle(title);
         }
-        return bookRepository.findAll();
+        return new HashSet<>(bookRepository.findAll());
     }
 
     public Optional<Book> borrowBook(Long id) {
         Optional<Book> bookById = bookRepository.findById(id);
-        bookById.ifPresent(book -> book.setDateOfReturn(LocalDate.now().plusDays(30)));
-        return bookById;
+        if (bookById.isPresent()) {
+            Book book = bookById.get();
+            if (book.getDateOfReturn() == null) {
+                book.setDateOfReturn(LocalDate.now().plusDays(30));
+                return Optional.of(bookRepository.save(book));
+            }
+            return Optional.empty();
+        }
+        return Optional.empty();
     }
 
     public Book add(Book book) {
-        return bookRepository.addBook(book);
+        return bookRepository.save(book);
     }
 
-    public boolean removeBook(Long id) {
-        Optional<Book> bookToRemove = bookRepository.findById(id);
-        if (bookToRemove.isPresent()) {
-            return bookRepository.delete(bookToRemove.get());
-        }
-        return false;
+    public void removeBook(Long id) {
+        bookRepository.deleteById(id);
     }
 }
